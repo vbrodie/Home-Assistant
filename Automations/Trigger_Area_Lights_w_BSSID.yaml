@@ -1,0 +1,53 @@
+# This automation turns lights on and off in an area based on whether or not a device is connected to a specific BSSID. For example, automatically turning the lights off in a room when you leave it with your phone. A BSSID entity is used rather than an "SSID" entity to accomodate mesh networks and zone-level automations, however SSID can *technically* be used.
+
+alias: BSSID Automation Name   # name your automation
+description: ""
+
+# Define your triggers
+triggers:
+
+# Defines BSSID entity ID. State is when device's BSSID value changes from anything to your BSSID address.
+  - trigger: state
+    entity_id:
+      - sensor.your_bssid_entity_id   # replace with your device's BSSID entity id
+    from: null
+    to: 00:00:00:00:00:00   # replace with your BSSID address
+    id: connect   # defines ID name for use in ACTIONS. You can change this.
+    
+# Defines BSSID entity ID. State is when device's BSSID value changes from your BSSID address to anything
+  - trigger: state
+    entity_id:
+      - sensor.your_bssid_entity_id    # replace with your device's BSSID entity id.
+    from: 00:00:00:00:00:00   # replace with your BSSID address
+    id: disconnect   # defines ID name for use in ACTIONS. You can change this.
+
+conditions: []
+
+# Now let's tell HA what to do! We'll give it two options!
+actions:
+  - choose:
+  
+# Turns area lights on when device BSSID value changes from anything to your BSSID.
+      - conditions:
+          - condition: trigger
+            id:
+              - connect
+        sequence:
+          - action: light.turn_on
+            metadata: {}
+            data: {}
+            target:
+              area_id: your_area   # replace with your area id
+              
+# Turn area lights off when device BSSID value changes from your BSSID to anything
+      - conditions:
+          - condition: trigger
+            id:
+              - disconnect
+        sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              area_id: your_area   # replace with your area id
+mode: single
